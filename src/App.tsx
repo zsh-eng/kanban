@@ -10,16 +10,19 @@ import { kanbanToMarkdown } from '@/lib/markdown/kanban-to-markdown';
 import { markdownToKanban } from '@/lib/markdown/markdown-to-kanban';
 import type { KanbanBoard as KanbanBoardType } from '@/types/kanban';
 import MarkdownWorker from '@/workers/markdown?worker';
-import { Sidebar } from 'lucide-react';
+import { PanelRight, Sidebar } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import './index.css';
 import { useChangeThemeShortcut } from '@/hooks/use-change-theme-shortcut';
+import { useToggleRightSidebar } from '@/hooks/use-toggle-right-sidebar';
+import { cn } from '@/lib/utils';
+import './index.css';
 
 const worker = new MarkdownWorker();
 
 export default function App() {
   useChangeThemeShortcut();
+  const { isRightSidebarOpen, setIsRightSidebarOpen } = useToggleRightSidebar();
 
   const [markdown, setMarkdown] = useState<string>(
     '# My Kanban Board\n\n## To Do\n\n- [ ] First task\n\n## In Progress\n\n## Done\n'
@@ -79,21 +82,38 @@ export default function App() {
           </Button>
           <h1 className='text-sm'>{board.title}</h1>
         </div>
+
+        <Button
+          variant='ghost'
+          size='icon'
+          className={cn(
+            'size-7',
+            isRightSidebarOpen && 'bg-accent dark:bg-accent/50'
+          )}
+          onClick={() => setIsRightSidebarOpen((prev) => !prev)}
+        >
+          <PanelRight className='w-4 h-4' />
+        </Button>
       </div>
 
       <ResizablePanelGroup direction='horizontal' className='flex-1'>
         <ResizablePanel defaultSize={50}>
-          <div className='h-full p-2'>
+          <KanbanBoard board={board} onBoardChange={handleBoardChange} />
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel
+          defaultSize={50}
+          minSize={isRightSidebarOpen ? 30 : 0}
+          maxSize={isRightSidebarOpen ? 80 : 0}
+          className={cn()}
+        >
+          <div className={cn('h-full p-2')}>
             <MarkdownEditor
               content={markdown}
               onChange={handleMarkdownChange}
               className='h-full'
             />
           </div>
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={50}>
-          <KanbanBoard board={board} onBoardChange={handleBoardChange} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
