@@ -9,9 +9,10 @@ import {
 import { kanbanToMarkdown } from '@/lib/markdown/kanban-to-markdown';
 import type { KanbanBoard as KanbanBoardType } from '@/types/kanban';
 import MarkdownWorker from '@/workers/markdown?worker';
-import { PanelRight, Sidebar } from 'lucide-react';
+import { PanelRight } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useChangeThemeShortcut } from '@/hooks/use-change-theme-shortcut';
 import { useCurrentBoardStore, useKanbanStore } from '@/hooks/use-store';
 import { useToggleRightSidebar } from '@/hooks/use-toggle-right-sidebar';
@@ -53,7 +54,7 @@ export default function App() {
     return () => {
       worker.removeEventListener('message', handleMarkdownWorkerMessage);
     };
-  }, []);
+  }, [currentBoardName]);
 
   const handleMarkdownChange = useCallback(
     async (newMarkdown: string) => {
@@ -88,12 +89,10 @@ export default function App() {
   }
 
   return (
-    <div className='h-screen flex flex-col dark:bg-background dark:text-foreground'>
+    <div className='h-full flex flex-col dark:bg-background dark:text-foreground dark:rounded-full w-full'>
       <div className='border-b px-2 py-2 flex justify-between items-center'>
         <div className='flex items-center gap-1'>
-          <Button variant='ghost' size='icon' className='size-7'>
-            <Sidebar className='w-4 h-4' />
-          </Button>
+          <SidebarTrigger />
           <h1 className='text-sm'>{board.title}</h1>
         </div>
 
@@ -110,7 +109,7 @@ export default function App() {
         </Button>
       </div>
 
-      <ResizablePanelGroup direction='horizontal' className='flex-1'>
+      <ResizablePanelGroup direction='horizontal' className=''>
         <ResizablePanel defaultSize={50}>
           <KanbanBoard board={board} onBoardChange={handleBoardChange} />
         </ResizablePanel>

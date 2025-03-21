@@ -51,15 +51,22 @@ export const markdownToKanban = (
     filePath,
   };
 
+  let headingSeen = false;
+
   let currentColumn: KanbanColumn | null = null;
 
   visit(tree, ['heading', 'list'], (node) => {
     if (node.type === 'heading') {
       const headingNode = node;
-      const headingText = (headingNode.children[0] as Text).value;
+      const headingText = (headingNode?.children?.[0] as Text)?.value;
 
-      if (headingNode.depth === 1) {
+      if (!headingText) {
+        return;
+      }
+
+      if (headingNode.depth === 1 && !headingSeen) {
         board.title = headingText;
+        headingSeen = true;
       } else if (headingNode.depth === 2) {
         currentColumn = {
           id: `column-${board.columns.length}`,
