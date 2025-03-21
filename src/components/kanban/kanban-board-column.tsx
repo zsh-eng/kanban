@@ -74,7 +74,7 @@ export function KanbanBoardColumn({
 
 export function KanbanCompletedTasksColumn({ tasks }: { tasks: KanbanTask[] }) {
   return (
-    <div className='flex-shrink-0 w-80 pb-8'>
+    <div className='flex-shrink-0 w-72 pb-8'>
       <Card className='p-2 shadow-none rounded-sm bg-muted/20 gap-2 h-full'>
         <div className='flex items-center gap-2 pl-2 mt-2 mb-2'>
           <CheckCircle className='w-4 h-4 text-muted-foreground' />
@@ -88,7 +88,7 @@ export function KanbanCompletedTasksColumn({ tasks }: { tasks: KanbanTask[] }) {
             <div key={`${task.id}-${index}`}>
               <Card className='p-3 shadow-xs rounded-sm animate-in fade-in zoom-in'>
                 <div className='flex items-center gap-2 text-sm min-h-8 text-wrap'>
-                  <CheckCircle className='w-4 h-4 text-muted-foreground' />
+                  <CheckCircle className='w-4 h-4 text-muted-foreground flex-shrink-0' />
                   <div
                     className={
                       task.content === '' ? 'text-muted-foreground' : ''
