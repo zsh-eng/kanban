@@ -1,4 +1,4 @@
-import { currentBoardStore } from '@/lib/store';
+import { currentBoardStore, kanbanGlobalStore } from '@/lib/store';
 
 import { NewBoardDialog } from '@/components/new-board-dialog';
 import {
@@ -13,6 +13,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCurrentBoardStore, useKanbanStore } from '@/hooks/use-store';
+import { createDefaultKanban } from '@/lib/store/default';
 
 function KanbanIcon() {
   return (
@@ -28,7 +29,13 @@ export function BoardsSidebar() {
   const currentBoard = useCurrentBoardStore((state) => state.currentBoardName);
 
   function handleNewBoard(name: string) {
-    console.log('new board', name);
+    const kanban = createDefaultKanban(name);
+    kanbanGlobalStore.setState({
+      [name]: kanban,
+    });
+    currentBoardStore.setState({
+      currentBoardName: name,
+    });
   }
 
   return (
