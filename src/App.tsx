@@ -1,51 +1,101 @@
-import { invoke } from '@tauri-apps/api/core';
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
+import { MarkdownEditor } from '@/components/editor/MarkdownEditor';
+import { KanbanBoard } from '@/components/kanban/kanban-board';
+import { Button } from '@/components/ui/button';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
+import { kanbanToMarkdown } from '@/lib/markdown/kanban-to-markdown';
+import { markdownToKanban } from '@/lib/markdown/markdown-to-kanban';
+import type { KanbanBoard as KanbanBoardType } from '@/types/kanban';
+import MarkdownWorker from '@/workers/markdown?worker';
+import { Sidebar } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+
 import './index.css';
+import { useChangeThemeShortcut } from '@/hooks/use-change-theme-shortcut';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState('');
-  const [name, setName] = useState('');
+const worker = new MarkdownWorker();
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke('greet', { name }));
+export default function App() {
+  useChangeThemeShortcut();
+
+  const [markdown, setMarkdown] = useState<string>(
+    '# My Kanban Board\n\n## To Do\n\n- [ ] First task\n\n## In Progress\n\n## Done\n'
+  );
+  const [board, setBoard] = useState<KanbanBoardType | null>(null);
+  const [currentFile, setCurrentFile] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadInitialBoard = () => {
+      const initialBoard = markdownToKanban(markdown, 'untitled.md');
+      setBoard(initialBoard);
+    };
+    loadInitialBoard();
+  }, []);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const { result } = event.data;
+      setBoard(result);
+    };
+
+    worker.addEventListener('message', handleMessage);
+    return () => {
+      worker.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+  const handleMarkdownChange = useCallback(
+    async (newMarkdown: string) => {
+      worker.postMessage({
+        markdown: newMarkdown,
+        filePath: currentFile || 'untitled.md',
+      });
+      // TODO: persist to file
+    },
+    [currentFile]
+  );
+
+  const handleBoardChange = async (newBoard: KanbanBoardType) => {
+    setBoard(newBoard);
+    const newMarkdown = await kanbanToMarkdown(newBoard);
+    setMarkdown(newMarkdown);
+
+    // TODO: persist to file
+  };
+
+  if (!board) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <main className='container'>
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className='row'>
-        <a href='https://vitejs.dev' target='_blank'>
-          <img src='/vite.svg' className='logo vite' alt='Vite logo' />
-        </a>
-        <a href='https://tauri.app' target='_blank'>
-          <img src='/tauri.svg' className='logo tauri' alt='Tauri logo' />
-        </a>
-        <a href='https://reactjs.org' target='_blank'>
-          <img src={reactLogo} className='logo react' alt='React logo' />
-        </a>
+    <div className='h-screen flex flex-col dark:bg-background dark:text-foreground'>
+      <div className='border-b px-2 py-2 flex justify-between items-center'>
+        <div className='flex items-center gap-1'>
+          <Button variant='ghost' size='icon' className='size-7'>
+            <Sidebar className='w-4 h-4' />
+          </Button>
+          <h1 className='text-sm'>{board.title}</h1>
+        </div>
       </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
 
-      <form
-        className='row'
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id='greet-input'
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder='Enter a name...'
-        />
-        <button type='submit'>Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      <ResizablePanelGroup direction='horizontal' className='flex-1'>
+        <ResizablePanel defaultSize={50}>
+          <div className='h-full p-2'>
+            <MarkdownEditor
+              content={markdown}
+              onChange={handleMarkdownChange}
+              className='h-full'
+            />
+          </div>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={50}>
+          <KanbanBoard board={board} onBoardChange={handleBoardChange} />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   );
 }
-
-export default App;
