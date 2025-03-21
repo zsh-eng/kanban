@@ -1,4 +1,5 @@
 import { useTheme } from '@/components/theme-provider';
+import { isTextInput } from '@/lib/utils';
 import { useEffect } from 'react';
 
 export function useChangeThemeShortcut() {
@@ -6,7 +7,12 @@ export function useChangeThemeShortcut() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'd' && !event.shiftKey) {
+      // Ignore theme toggle shortcut if user is typing in an input field
+      if (isTextInput(event)) {
+        return;
+      }
+
+      if (event.key === 't' && !event.shiftKey) {
         setTheme(theme === 'dark' ? 'light' : 'dark');
       }
     };
