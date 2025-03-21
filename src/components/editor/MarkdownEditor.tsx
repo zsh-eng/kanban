@@ -27,7 +27,7 @@ export function MarkdownEditor({
   const flexokiTheme = createTheme({
     theme: 'light',
     settings: {
-      fontFamily: 'Optima',
+      fontFamily: 'system-ui; sans-serif',
       background: 'var(--background)',
       foreground: 'var(--foreground)',
       caret: 'var(--foreground)',

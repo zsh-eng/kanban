@@ -7,14 +7,15 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import { kanbanToMarkdown } from '@/lib/markdown/kanban-to-markdown';
-import { markdownToKanban } from '@/lib/markdown/markdown-to-kanban';
 import type { KanbanBoard as KanbanBoardType } from '@/types/kanban';
 import MarkdownWorker from '@/workers/markdown?worker';
 import { PanelRight, Sidebar } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useChangeThemeShortcut } from '@/hooks/use-change-theme-shortcut';
+import { useKanbanStore } from '@/hooks/use-store';
 import { useToggleRightSidebar } from '@/hooks/use-toggle-right-sidebar';
+import { kanbanGlobalStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import './index.css';
 
@@ -24,29 +25,27 @@ export default function App() {
   useChangeThemeShortcut();
   const { isRightSidebarOpen, setIsRightSidebarOpen } = useToggleRightSidebar();
 
-  const [markdown, setMarkdown] = useState<string>(
-    '# My Kanban Board\n\n## To Do\n\n- [ ] First task\n\n## In Progress\n\n## Done\n'
-  );
-  const [board, setBoard] = useState<KanbanBoardType | null>(null);
-  const [currentFile, setCurrentFile] = useState<string | null>(null);
+  const kanbanGlobalState = useKanbanStore((state) => state);
+
+  const [currentFile, setCurrentFile] = useState<string>('untitled.md');
+  const TEMP_KANBAN = kanbanGlobalState[currentFile];
+  const markdown = TEMP_KANBAN?.markdown ?? '';
+  const board = TEMP_KANBAN?.board ?? null;
 
   useEffect(() => {
-    const loadInitialBoard = () => {
-      const initialBoard = markdownToKanban(markdown, 'untitled.md');
-      setBoard(initialBoard);
-    };
-    loadInitialBoard();
-  }, []);
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+    const handleMarkdownWorkerMessage = (event: MessageEvent) => {
       const { result } = event.data;
-      setBoard(result);
+      kanbanGlobalStore.setState({
+        [currentFile]: {
+          ...kanbanGlobalState[currentFile],
+          board: result,
+        },
+      });
     };
 
-    worker.addEventListener('message', handleMessage);
+    worker.addEventListener('message', handleMarkdownWorkerMessage);
     return () => {
-      worker.removeEventListener('message', handleMessage);
+      worker.removeEventListener('message', handleMarkdownWorkerMessage);
     };
   }, []);
 
@@ -62,9 +61,14 @@ export default function App() {
   );
 
   const handleBoardChange = async (newBoard: KanbanBoardType) => {
-    setBoard(newBoard);
     const newMarkdown = await kanbanToMarkdown(newBoard);
-    setMarkdown(newMarkdown);
+    kanbanGlobalStore.setState({
+      [currentFile]: {
+        ...kanbanGlobalState[currentFile],
+        markdown: newMarkdown,
+        board: newBoard,
+      },
+    });
 
     // TODO: persist to file
   };
