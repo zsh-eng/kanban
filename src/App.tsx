@@ -10,10 +10,10 @@ import { kanbanToMarkdown } from '@/lib/markdown/kanban-to-markdown';
 import type { KanbanBoard as KanbanBoardType } from '@/types/kanban';
 import MarkdownWorker from '@/workers/markdown?worker';
 import { PanelRight, Sidebar } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useChangeThemeShortcut } from '@/hooks/use-change-theme-shortcut';
-import { useKanbanStore } from '@/hooks/use-store';
+import { useCurrentBoardStore, useKanbanStore } from '@/hooks/use-store';
 import { useToggleRightSidebar } from '@/hooks/use-toggle-right-sidebar';
 import { kanbanGlobalStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -27,17 +27,23 @@ export default function App() {
 
   const kanbanGlobalState = useKanbanStore((state) => state);
 
-  const [currentFile, setCurrentFile] = useState<string>('untitled.md');
-  const TEMP_KANBAN = kanbanGlobalState[currentFile];
+  const currentBoardName = useCurrentBoardStore(
+    (state) => state.currentBoardName
+  );
+  const TEMP_KANBAN = kanbanGlobalState[currentBoardName ?? ''];
   const markdown = TEMP_KANBAN?.markdown ?? '';
   const board = TEMP_KANBAN?.board ?? null;
 
   useEffect(() => {
+    if (!currentBoardName) {
+      return;
+    }
+
     const handleMarkdownWorkerMessage = (event: MessageEvent) => {
       const { result } = event.data;
       kanbanGlobalStore.setState({
-        [currentFile]: {
-          ...kanbanGlobalState[currentFile],
+        [currentBoardName]: {
+          ...kanbanGlobalState[currentBoardName],
           board: result,
         },
       });
@@ -53,18 +59,22 @@ export default function App() {
     async (newMarkdown: string) => {
       worker.postMessage({
         markdown: newMarkdown,
-        filePath: currentFile || 'untitled.md',
+        filePath: currentBoardName || 'untitled.md',
       });
       // TODO: persist to file
     },
-    [currentFile]
+    [currentBoardName]
   );
 
   const handleBoardChange = async (newBoard: KanbanBoardType) => {
+    if (!currentBoardName) {
+      return;
+    }
+
     const newMarkdown = await kanbanToMarkdown(newBoard);
     kanbanGlobalStore.setState({
-      [currentFile]: {
-        ...kanbanGlobalState[currentFile],
+      [currentBoardName]: {
+        ...kanbanGlobalState[currentBoardName],
         markdown: newMarkdown,
         board: newBoard,
       },

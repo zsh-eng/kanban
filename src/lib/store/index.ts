@@ -48,6 +48,13 @@ export type KanbanGlobalState = Record<
 
 export const kanbanGlobalStore = createStore<KanbanGlobalState>({});
 
+export type CurrentBoardState = {
+  currentBoardName: string | null;
+};
+export const currentBoardStore = createStore<CurrentBoardState>({
+  currentBoardName: null,
+});
+
 const DEFAULT_KANBAN_STRING =
   '# My Kanban Board\n\n## To Do\n\n- [ ] First task\n\n## In Progress\n\n';
 
@@ -79,6 +86,7 @@ async function initializeKanbanGlobalStore() {
   );
 
   kanbanGlobalStore.setState(kanbanObject);
+  currentBoardStore.setState({ currentBoardName: kanbans[0].name });
 }
 
 initializeKanbanGlobalStore();
