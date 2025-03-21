@@ -14,7 +14,7 @@ export function KanbanBoardColumn({
   board: KanbanBoard;
 }) {
   return (
-    <div key={column.id} className='flex-shrink-0 w-80 pb-8'>
+    <div key={column.id} className='flex-shrink-0 w-72 pb-8'>
       <Card className='p-2 shadow-none rounded-sm bg-muted/20 gap-2 h-full'>
         <div className='flex items-center gap-2 pl-2 mt-2 mb-2'>
           <StyledCircle className='' />
@@ -27,8 +27,8 @@ export function KanbanBoardColumn({
           {column.tasks.map((task, index) =>
             !task.completed ? (
               <div key={`${task.id}-${index}`}>
-                <Card className='p-3 rounded-sm animate-in fade-in zoom-in shadow-none'>
-                  <div className='flex items-center gap-2 text-sm min-h-8 text-wrap'>
+                <Card className='p-2 rounded-sm animate-in fade-in zoom-in shadow-none min-h-10'>
+                  <div className='flex items-center gap-2 text-sm text-wrap'>
                     <StyledCircle className='' />
                     <div
                       className={
