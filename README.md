@@ -1,7 +1,43 @@
-# Tauri + React + Typescript
+# Markdown Kanban
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A local-first Kanban board application that uses markdown files as its data source.
 
-## Recommended IDE Setup
+## Installation
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+1. Install dependencies:
+
+  ```bash
+  pnpm install
+  ```
+
+2. Run the development server:
+
+  ```bash
+  pnpm tauri dev
+  ```
+
+3. Build for production:
+
+  ```bash
+  pnpm tauri build
+  ```
+
+## Usage
+
+### Markdown Format
+
+```markdown
+# Board Title
+
+## Column 1
+- [ ] Task 1
+- [x] Completed task
+- [ ] Task with [[link]]
+
+## Column 2
+- [ ] Another task
+```
+
+## License
+
+MIT
