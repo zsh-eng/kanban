@@ -1,24 +1,49 @@
 import { currentBoardStore } from '@/lib/store';
 
+import { NewBoardDialog } from '@/components/new-board-dialog';
 import {
     Sidebar,
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
+    SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCurrentBoardStore, useKanbanStore } from '@/hooks/use-store';
 
+function KanbanIcon() {
+  return (
+    <div className='border rounded-sm p-1 bg-background w-6 h-6 text-sm flex items-center justify-center'>
+      K
+    </div>
+  );
+}
+
 export function BoardsSidebar() {
   const store = useKanbanStore((state) => state);
-  const boardNames = Object.keys(store);
+  const boardNames = Object.values(store).map((board) => board.name);
   const currentBoard = useCurrentBoardStore((state) => state.currentBoardName);
+
+  function handleNewBoard(name: string) {
+    console.log('new board', name);
+  }
 
   return (
     <Sidebar variant='inset'>
+      <SidebarHeader>
+        <div className='flex justify-between items-center'>
+          <div className='flex items-center gap-2'>
+            <KanbanIcon />
+            <h1 className='text-xs font-semibold'>Kanban</h1>
+          </div>
+          <div>
+            <NewBoardDialog onNewBoard={handleNewBoard} />
+          </div>
+        </div>
+      </SidebarHeader>
       <SidebarContent className=''>
         {/* TODO: header for the kanban that allows you to add new kanbans */}
         <SidebarGroup>
