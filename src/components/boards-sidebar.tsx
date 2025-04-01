@@ -1,16 +1,18 @@
 import { currentBoardStore, kanbanGlobalStore } from '@/lib/store';
 
 import { NewBoardDialog } from '@/components/new-board-dialog';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCurrentBoardStore, useKanbanStore } from '@/hooks/use-store';
 import { createDefaultKanban } from '@/lib/store/default';
@@ -79,6 +81,12 @@ export function BoardsSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <div className='flex justify-end'>
+          <ThemeToggle />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

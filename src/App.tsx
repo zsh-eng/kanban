@@ -15,7 +15,7 @@ import type {
 } from '@/types/kanban';
 import MarkdownWorker from '@/workers/markdown?worker';
 import { PanelRight } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useChangeThemeShortcut } from '@/hooks/use-change-theme-shortcut';
@@ -58,6 +58,8 @@ export default function App() {
   const currentBoardName = useCurrentBoardStore(
     (state) => state.currentBoardName
   );
+  const [boardRevision, setBoardRevision] = useState(0);
+
   const TEMP_KANBAN = kanbanGlobalState[currentBoardName ?? ''];
   const markdown = TEMP_KANBAN?.markdown ?? '';
   const board = TEMP_KANBAN?.board ?? null;
@@ -67,7 +69,7 @@ export default function App() {
       return;
     }
 
-    const unsubscribe = subscribeToUpdate('editor', (update) => {
+    const unsubEditorToBoardUpdates = subscribeToUpdate('editor', (update) => {
       kanbanGlobalStore.setState({
         [currentBoardName]: {
           ...kanbanGlobalState[currentBoardName],
@@ -76,8 +78,19 @@ export default function App() {
       });
     });
 
+    const unsubBoardToEditorUpdates = subscribeToUpdate('board', (update) => {
+      kanbanGlobalStore.setState({
+        [currentBoardName]: {
+          ...kanbanGlobalState[currentBoardName],
+          board: update.board,
+        },
+      });
+      setBoardRevision((prev) => prev + 1);
+    });
+
     return () => {
-      unsubscribe();
+      unsubEditorToBoardUpdates();
+      unsubBoardToEditorUpdates();
     };
   }, [currentBoardName]);
 
@@ -151,6 +164,7 @@ export default function App() {
               content={markdown}
               onChange={handleMarkdownChange}
               className='h-full'
+              revision={boardRevision}
             />
           </div>
         </ResizablePanel>
