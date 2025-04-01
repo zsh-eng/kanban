@@ -1,14 +1,20 @@
 import { markdownToKanban } from '@/lib/markdown/markdown-to-kanban';
+import { KanbanUpdateRequest, KanbanUpdateResponse } from '@/types/kanban';
 
 console.log('markdown worker initializing...');
 
 self.onmessage = (event) => {
   console.log('received message', event.data);
-  const { markdown, filePath } = event.data;
+  const { content, id, source, timestamp } = event.data as KanbanUpdateRequest;
   try {
-    const kanban = markdownToKanban(markdown, filePath);
+    const kanban = markdownToKanban(content, id);
     self.postMessage({
-      result: kanban,
+      result: {
+        source,
+        board: kanban,
+        id,
+        timestamp,
+      } satisfies KanbanUpdateResponse,
     });
   } catch (error) {
     console.error('Error in worker:', error);

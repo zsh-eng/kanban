@@ -7,7 +7,12 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import { kanbanToMarkdown } from '@/lib/markdown/kanban-to-markdown';
-import type { KanbanBoard as KanbanBoardType } from '@/types/kanban';
+import type {
+  KanbanBoard as KanbanBoardType,
+  KanbanUpdateRequest,
+  KanbanUpdateResponse,
+  KanbanUpdateSource,
+} from '@/types/kanban';
 import MarkdownWorker from '@/workers/markdown?worker';
 import { PanelRight } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
@@ -21,6 +26,28 @@ import { cn } from '@/lib/utils';
 import './index.css';
 
 const worker = new MarkdownWorker();
+
+function sendMessage(update: KanbanUpdateRequest) {
+  worker.postMessage(update);
+}
+
+function subscribeToUpdate(
+  source: KanbanUpdateSource,
+  callback: (update: KanbanUpdateResponse) => void
+): () => void {
+  const handleMessage = (event: MessageEvent) => {
+    const { result } = event.data;
+    if (result.source === source) {
+      callback(result);
+    }
+  };
+
+  console.log('subscribing to update', source);
+  worker.addEventListener('message', handleMessage);
+  return () => {
+    worker.removeEventListener('message', handleMessage);
+  };
+}
 
 export default function App() {
   useChangeThemeShortcut();
@@ -40,29 +67,28 @@ export default function App() {
       return;
     }
 
-    const handleMarkdownWorkerMessage = (event: MessageEvent) => {
-      const { result } = event.data;
+    const unsubscribe = subscribeToUpdate('editor', (update) => {
       kanbanGlobalStore.setState({
         [currentBoardName]: {
           ...kanbanGlobalState[currentBoardName],
-          board: result,
+          board: update.board,
         },
       });
-    };
+    });
 
-    worker.addEventListener('message', handleMarkdownWorkerMessage);
     return () => {
-      worker.removeEventListener('message', handleMarkdownWorkerMessage);
+      unsubscribe();
     };
   }, [currentBoardName]);
 
   const handleMarkdownChange = useCallback(
     async (newMarkdown: string) => {
-      worker.postMessage({
-        markdown: newMarkdown,
-        filePath: currentBoardName || 'untitled.md',
+      sendMessage({
+        source: 'editor',
+        content: newMarkdown,
+        id: currentBoardName || 'untitled.md',
+        timestamp: Date.now(),
       });
-      // TODO: persist to file
     },
     [currentBoardName]
   );
