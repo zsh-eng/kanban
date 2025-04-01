@@ -1,4 +1,5 @@
 import { StyledCircle } from '@/components/icons/styled-circle';
+import { TaskContextMenu } from '@/components/kanban/task-context-menu';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { KanbanBoard, KanbanColumn, KanbanTask } from '@/types/kanban';
@@ -27,20 +28,27 @@ export function KanbanBoardColumn({
           {column.tasks.map((task, index) =>
             !task.completed ? (
               <div key={`${task.id}-${index}`}>
-                <Card className='p-2 rounded-sm animate-in fade-in zoom-in shadow-none min-h-10'>
-                  <div className='flex items-center gap-2 text-sm text-wrap'>
-                    <StyledCircle className='' />
-                    <div
-                      className={
-                        task.content === '' ? 'text-muted-foreground' : ''
-                      }
-                    >
-                      {task.content === ''
-                        ? 'Fill in a description...'
-                        : task.content}
+                <TaskContextMenu
+                  task={task}
+                  board={board}
+                  columnId={column.id}
+                  onBoardChange={onBoardChange}
+                >
+                  <Card className='p-2 rounded-sm animate-in fade-in zoom-in shadow-none min-h-10'>
+                    <div className='flex items-center gap-2 text-sm text-wrap'>
+                      <StyledCircle className='' />
+                      <div
+                        className={
+                          task.content === '' ? 'text-muted-foreground' : ''
+                        }
+                      >
+                        {task.content === ''
+                          ? 'Fill in a description...'
+                          : task.content}
+                      </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </TaskContextMenu>
               </div>
             ) : null
           )}
