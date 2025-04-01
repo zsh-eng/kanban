@@ -55,11 +55,6 @@ export function KanbanBoardColumn({
                 id: crypto.randomUUID(),
                 content: '',
                 completed: false,
-                metadata: {
-                  created: new Date().toISOString(),
-                  modified: new Date().toISOString(),
-                  links: [],
-                },
               });
               onBoardChange(newBoard);
             }}

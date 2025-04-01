@@ -22,11 +22,6 @@ export function createDefaultKanban(filename: string) {
               id: '1',
               completed: false,
               content: 'First task',
-              metadata: {
-                created: new Date().toISOString(),
-                modified: new Date().toISOString(),
-                links: [],
-              },
             },
           ],
         },

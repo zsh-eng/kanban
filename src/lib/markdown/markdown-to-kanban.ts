@@ -85,11 +85,6 @@ export const markdownToKanban = (
             id: `task-${currentColumn!.id}-${index}`,
             content,
             completed,
-            metadata: {
-              created: new Date().toISOString(),
-              modified: new Date().toISOString(),
-              links: extractLinks(content),
-            },
           };
           currentColumn!.tasks.push(task);
         }
