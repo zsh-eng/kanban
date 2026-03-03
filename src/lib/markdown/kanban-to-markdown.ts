@@ -1,6 +1,6 @@
 import { KanbanBoard } from '@/types/kanban';
 
-export const kanbanToMarkdown = async (board: KanbanBoard): Promise<string> => {
+export const kanbanToMarkdown = (board: KanbanBoard): string => {
   let markdown = `# ${board.title}\n\n`;
 
   board.columns.forEach((column) => {

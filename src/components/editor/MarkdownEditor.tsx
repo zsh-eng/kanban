@@ -1,65 +1,68 @@
-import { markdown } from '@codemirror/lang-markdown';
-import { EditorView, KeyBinding, keymap } from '@codemirror/view';
-import { tags as t } from '@lezer/highlight';
-import { vim } from '@replit/codemirror-vim';
-import { createTheme } from '@uiw/codemirror-themes';
-import CodeMirror from '@uiw/react-codemirror';
-import { useCallback } from 'react';
+import { markdown } from "@codemirror/lang-markdown";
+import { EditorView, KeyBinding, keymap } from "@codemirror/view";
+
+import { tags as t } from "@lezer/highlight";
+import { vim } from "@replit/codemirror-vim";
+import { createTheme } from "@uiw/codemirror-themes";
+import CodeMirror from "@uiw/react-codemirror";
+import { useCallback } from "react";
 
 interface MarkdownEditorProps {
   content: string;
   onChange: (value: string) => void;
   className?: string;
+  revision: number;
 }
 
 export function MarkdownEditor({
   content,
   onChange,
   className,
+  revision,
 }: MarkdownEditorProps) {
   const handleChange = useCallback(
     (value: string) => {
       onChange(value);
     },
-    [onChange]
+    [onChange],
   );
 
   const flexokiTheme = createTheme({
-    theme: 'light',
+    theme: "light",
     settings: {
-      fontFamily: 'system-ui; sans-serif',
-      background: 'var(--background)',
-      foreground: 'var(--foreground)',
-      caret: 'var(--foreground)',
-      selection: 'var(--background)',
-      selectionMatch: 'var(--background)',
-      gutterBackground: 'var(--background)',
-      gutterForeground: 'var(--foreground)',
-      gutterBorder: 'var(--background)',
-      lineHighlight: 'var(--background)',
+      fontFamily: "system-ui; sans-serif",
+      background: "var(--background)",
+      foreground: "var(--foreground)",
+      caret: "var(--foreground)",
+      selection: "var(--background)",
+      selectionMatch: "var(--background)",
+      gutterBackground: "var(--background)",
+      gutterForeground: "var(--foreground)",
+      gutterBorder: "var(--background)",
+      lineHighlight: "var(--background)",
     },
     styles: [
-      { tag: t.comment, color: 'var(--muted-foreground)' },
-      { tag: t.heading, color: 'var(--muted-foreground)' },
+      { tag: t.comment, color: "var(--muted-foreground)" },
+      { tag: t.heading, color: "var(--muted-foreground)" },
       {
         tag: t.heading1,
-        color: 'var(--muted-foreground)',
-        class: 'text-2xl font-bold',
+        color: "var(--muted-foreground)",
+        class: "text-2xl font-bold",
       },
       {
         tag: t.heading2,
-        color: 'var(--muted-foreground)',
-        class: 'text-xl font-bold',
+        color: "var(--muted-foreground)",
+        class: "text-xl font-bold",
       },
       {
         tag: t.heading3,
-        color: 'var(--muted-foreground)',
-        class: 'text-lg font-bold',
+        color: "var(--muted-foreground)",
+        class: "text-lg font-bold",
       },
-      { tag: t.list, color: 'var(--foreground)' },
-      { tag: t.quote, color: 'var(--muted-foreground)' },
-      { tag: t.emphasis, fontStyle: 'italic' },
-      { tag: t.strong, fontWeight: 'bold' },
+      { tag: t.list, color: "var(--foreground)" },
+      { tag: t.quote, color: "var(--muted-foreground)" },
+      { tag: t.emphasis, fontStyle: "italic" },
+      { tag: t.strong, fontWeight: "bold" },
     ],
   });
 
@@ -74,10 +77,10 @@ export function MarkdownEditor({
 
       if (hasCheckbox) {
         // Toggle between [ ] and [x]
-        newText = lineText.replace(/\[ \]/, '[x]').replace(/\[x\]/, '[ ]');
+        newText = lineText.replace(/\[ \]/, "[x]").replace(/\[x\]/, "[ ]");
       } else {
         // Add checkbox if there isn't one
-        newText = lineText.replace(/^(\s*[-*+]\s+)/, '$1[ ] ');
+        newText = lineText.replace(/^(\s*[-*+]\s+)/, "$1[ ] ");
       }
 
       view.dispatch({
@@ -94,7 +97,7 @@ export function MarkdownEditor({
 
   const shortcuts: KeyBinding[] = [
     {
-      key: 'Mod-l',
+      key: "Mod-l",
       run: toggleCheckbox,
       preventDefault: true,
     },
@@ -102,8 +105,8 @@ export function MarkdownEditor({
 
   return (
     <CodeMirror
-      value={content}
-      height='100%'
+      defaultValue={content}
+      height="100%"
       extensions={[
         markdown(),
         vim(),

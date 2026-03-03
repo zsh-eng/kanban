@@ -41,7 +41,6 @@ export type KanbanGlobalState = Record<
   string,
   {
     board: KanbanBoard;
-    markdown: string;
     name: string;
   }
 >;
@@ -69,7 +68,6 @@ async function initializeKanbanGlobalStore() {
     return {
       name: file.name,
       board: markdownToKanban(file.content, file.name),
-      markdown: file.content,
     };
   });
 
@@ -77,7 +75,6 @@ async function initializeKanbanGlobalStore() {
     kanbans.push({
       name: 'untitled.md',
       board: markdownToKanban(DEFAULT_KANBAN_STRING, 'untitled.md'),
-      markdown: DEFAULT_KANBAN_STRING,
     });
   }
 

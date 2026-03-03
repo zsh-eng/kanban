@@ -42,7 +42,6 @@ function subscribeToUpdate(
     }
   };
 
-  console.log('subscribing to update', source);
   worker.addEventListener('message', handleMessage);
   return () => {
     worker.removeEventListener('message', handleMessage);
@@ -61,7 +60,8 @@ export default function App() {
   const [boardRevision, setBoardRevision] = useState(0);
 
   const TEMP_KANBAN = kanbanGlobalState[currentBoardName ?? ''];
-  const markdown = TEMP_KANBAN?.markdown ?? '';
+  // TODO: we should remove the markdown as well
+  const markdown = TEMP_KANBAN ? kanbanToMarkdown(TEMP_KANBAN.board) : null;
   const board = TEMP_KANBAN?.board ?? null;
 
   useEffect(() => {
@@ -78,19 +78,8 @@ export default function App() {
       });
     });
 
-    const unsubBoardToEditorUpdates = subscribeToUpdate('board', (update) => {
-      kanbanGlobalStore.setState({
-        [currentBoardName]: {
-          ...kanbanGlobalState[currentBoardName],
-          board: update.board,
-        },
-      });
-      setBoardRevision((prev) => prev + 1);
-    });
-
     return () => {
       unsubEditorToBoardUpdates();
-      unsubBoardToEditorUpdates();
     };
   }, [currentBoardName]);
 
@@ -111,14 +100,14 @@ export default function App() {
       return;
     }
 
-    const newMarkdown = await kanbanToMarkdown(newBoard);
     kanbanGlobalStore.setState({
       [currentBoardName]: {
         ...kanbanGlobalState[currentBoardName],
-        markdown: newMarkdown,
         board: newBoard,
       },
     });
+    console.log('updating revision')
+    setBoardRevision((prev) => prev + 1);
 
     // TODO: persist to file
   };
@@ -160,12 +149,18 @@ export default function App() {
           className={cn()}
         >
           <div className={cn('h-full p-2')}>
-            <MarkdownEditor
-              content={markdown}
-              onChange={handleMarkdownChange}
-              className='h-full'
-              revision={boardRevision}
-            />
+            {markdown ? (
+              <MarkdownEditor
+                content={markdown}
+                onChange={handleMarkdownChange}
+                className='h-full'
+                revision={boardRevision}
+              />
+            ) : (
+              <div className='h-full flex items-center justify-center'>
+                <p>No board selected</p>
+              </div>
+            )}
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
